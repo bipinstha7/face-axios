@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import axios from "axios";
 
 import Navigation from "./components/Navigation";
 import Rank from "./components/Rank";
@@ -52,12 +53,6 @@ class App extends Component {
     const width = Number(image.width);
     const height = Number(image.height);
 
-    console.log(width, height);
-
-    console.log("leftCol:", clarifaiFace.left_col * width);
-    console.log("topRow:", clarifaiFace.top_row * height);
-    console.log("rightCol:", (clarifaiFace.right_col * width));
-    console.log("bottomRow:", height - (clarifaiFace.bottom_row * height));
 
     return {
       leftCol: clarifaiFace.left_col * width,
@@ -77,8 +72,16 @@ class App extends Component {
 
   onButtonSubmit = () => {
     this.setState({ imageUrl: this.state.input });
+    
     app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
-      .then(response => this.displayFaceBox(this.calculateFaceLocation(response)))
+      .then(response => {
+        if(response) {
+          axios.put("http://localhost:5000/image", {id: this.state.user.id})
+          .then(count => this.setState(Object.assign(this.state.user, {entries: count.data.entries})))
+          .catch(err => console.log(err));
+        }
+        this.displayFaceBox(this.calculateFaceLocation(response));
+      })
       .catch(err => console.log(err));
   }
 
@@ -97,7 +100,7 @@ class App extends Component {
         <Navigation isSignedin={this.state.isSignedin} onRouteChange={this.onRouteChange} />
         {this.state.route === "home" ?
           <div>
-            <Rank />
+            <Rank name={this.state.user.name} entries={this.state.user.entries}/>
             <ImageLinkForm
               onInputChange={this.onInputChange}
               onButtonSubmit={this.onButtonSubmit}
@@ -108,7 +111,10 @@ class App extends Component {
             />
           </div>
           : (this.state.route === "signin" ?
-            <Signin onRouteChange={this.onRouteChange} />
+            <Signin 
+              onRouteChange={this.onRouteChange} 
+              loadUser={this.loadUser}
+            />
             :
             <Register
               onRouteChange={this.onRouteChange}

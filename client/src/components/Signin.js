@@ -28,8 +28,9 @@ class Signin extends Component {
       password: this.state.signinPassword
     }
     axios.post("http://localhost:5000/signin", loginFormData)
-      .then(result => {
-        if(result.data === "success") {
+      .then(user => {
+        if(user.data.id) {
+          this.props.loadUser(user.data);
           this.props.onRouteChange("home");
         }
       })

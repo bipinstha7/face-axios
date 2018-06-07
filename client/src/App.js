@@ -13,7 +13,6 @@ import Clarifai from "clarifai";
 
 const app = new Clarifai.App({
   apiKey: 'cda9bba25753460ca395d523c518b28d'
-  // apiKey: "c9f37abd2a2d4fabbb8f6aac827dbd41"
 });
 
 class App extends Component {
@@ -24,8 +23,27 @@ class App extends Component {
       imageUrl: "",
       box: {},
       route: "signin",
-      isSignedin: false
+      isSignedin: false,
+      user: {
+        id: "",
+        name: "",
+        email: "",
+        entries: 0,
+        joined: ""
+      }
     }
+  }
+
+  loadUser = (data) => {
+    this.setState({
+      user: {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        entries: data.entries,
+        joined: data.joined
+      }
+    });
   }
 
   calculateFaceLocation = (data) => {
@@ -37,7 +55,7 @@ class App extends Component {
     console.log(width, height);
 
     console.log("leftCol:", clarifaiFace.left_col * width);
-    console.log("topRow:" ,clarifaiFace.top_row * height);
+    console.log("topRow:", clarifaiFace.top_row * height);
     console.log("rightCol:", (clarifaiFace.right_col * width));
     console.log("bottomRow:", height - (clarifaiFace.bottom_row * height));
 
@@ -50,7 +68,7 @@ class App extends Component {
   }
 
   displayFaceBox = (box) => {
-    this.setState({box: box});
+    this.setState({ box: box });
   }
 
   onInputChange = (event) => {
@@ -65,18 +83,18 @@ class App extends Component {
   }
 
   onRouteChange = (route) => {
-    if(route === "signout") {
-      this.setState({isSignedin: false});
-    } else if(route === "home") {
-      this.setState({isSignedin: true});
+    if (route === "signout") {
+      this.setState({ isSignedin: false });
+    } else if (route === "home") {
+      this.setState({ isSignedin: true });
     }
-    this.setState({route: route});
+    this.setState({ route: route });
   }
 
   render() {
     return (
       <div className="App">
-        <Navigation isSignedin={this.state.isSignedin} onRouteChange={this.onRouteChange}/>
+        <Navigation isSignedin={this.state.isSignedin} onRouteChange={this.onRouteChange} />
         {this.state.route === "home" ?
           <div>
             <Rank />
@@ -90,10 +108,13 @@ class App extends Component {
             />
           </div>
           : (this.state.route === "signin" ?
-              <Signin onRouteChange={this.onRouteChange} />
+            <Signin onRouteChange={this.onRouteChange} />
             :
-              <Register onRouteChange={this.onRouteChange}/>
-            )
+            <Register
+              onRouteChange={this.onRouteChange}
+              loadUser={this.loadUser}
+            />
+          )
         }
       </div>
     );

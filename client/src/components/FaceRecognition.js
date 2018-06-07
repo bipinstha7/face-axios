@@ -3,7 +3,7 @@ import React from 'react';
  const FaceRecognition = ({imageUrl, box}) => {
   return (
     <div className="container mt-2 imageDiv">
-      <img id="inputImage" src={imageUrl} alt="detected result" width="500px" height="500px" />
+      <img id="inputImage" src={imageUrl} alt="" width="500px" height="500px" />
       <div 
         className="bounding-box" 
         style={{

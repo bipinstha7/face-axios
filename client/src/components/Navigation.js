@@ -1,6 +1,6 @@
 import React from "react";
 
-const Navigaton = () => {
+const Navigaton = ({onRouteChange}) => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <a className="navbar-brand" href="">Navbar</a>
@@ -11,13 +11,22 @@ const Navigaton = () => {
       <div className="collapse navbar-collapse" id="navbarSupportedContent">
         <ul className="navbar-nav ml-auto">
           <li className="nav-item">
-            <a className="nav-link" href="">Sign in </a>
+            <a 
+              className="nav-link" href=""
+              onClick={() => onRouteChange("signin")}
+            >Sign in </a>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="">Register</a>
+            <a 
+              className="nav-link" href=""
+              onClick={() => onRouteChange("register")}
+            >Register</a>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="">Signout</a>
+            <a 
+              className="nav-link" href=""
+              onClick={() => onRouteChange("signout")}  
+            >Signout</a>
           </li>
         </ul>
       </div>

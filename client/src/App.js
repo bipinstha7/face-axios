@@ -6,6 +6,9 @@ import Rank from "./components/Rank";
 import ImageLinkForm from "./components/ImageLinkForm";
 import FaceRecognition from "./components/FaceRecognition";
 import Signin from "./components/Signin";
+import Register from "./components/Register";
+
+
 import Clarifai from "clarifai";
 
 const app = new Clarifai.App({
@@ -20,7 +23,8 @@ class App extends Component {
       input: "",
       imageUrl: "",
       box: {},
-      route: "signin"
+      route: "signin",
+      isSignedin: false
     }
   }
 
@@ -61,16 +65,19 @@ class App extends Component {
   }
 
   onRouteChange = (route) => {
+    if(route === "signout") {
+      this.setState({isSignedin: false});
+    } else if(route === "home") {
+      this.setState({isSignedin: true});
+    }
     this.setState({route: route});
   }
 
   render() {
     return (
       <div className="App">
-        <Navigation onRouteChange={this.onRouteChange}/>
-        {this.state.route === "signin" ?
-          <Signin onRouteChange={this.onRouteChange}/>
-        :
+        <Navigation isSignedin={this.state.isSignedin} onRouteChange={this.onRouteChange}/>
+        {this.state.route === "home" ?
           <div>
             <Rank />
             <ImageLinkForm
@@ -82,6 +89,11 @@ class App extends Component {
               box={this.state.box}
             />
           </div>
+          : (this.state.route === "signin" ?
+              <Signin onRouteChange={this.onRouteChange} />
+            :
+              <Register onRouteChange={this.onRouteChange}/>
+            )
         }
       </div>
     );

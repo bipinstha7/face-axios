@@ -1,11 +1,16 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 
+const bcrypt = require("bcryptjs");
 const bodyParser = require("body-parser");
 
 // body-parser middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// cors middlwware
+app.use(cors());
 
 const database = {
   users: [
@@ -13,7 +18,7 @@ const database = {
       id: "1234",
       name: "bipin",
       email: "bipin@gmail.com",
-      password: "shrestha",
+      password: "care",
       entries: 0,
       joined: new Date()
     },
@@ -36,6 +41,10 @@ app.get("/", (req, res) => {
 
 // sign in route: POST
 app.post("/signin", (req, res) => {
+  // const password = req.body.password;
+  // bcrypt.compare(password, hash).then((res) => {
+  //   // res === true
+  // });
   if (req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
     res.json("success");
   } else {
@@ -53,21 +62,32 @@ app.post("/register", (req, res) => {
     entries: 0,
     joined: new Date()
   }
-  database.users.push(newUser);
-  res.json(database.users[database.users.length - 1]);
-});
+
+  // password encryption- hash
+  bcrypt.genSalt(10, (err, salt) => {
+    bcrypt.hash(newUser.password, salt, (err, hash) => {
+      if (err) throw new Error;
+      newUser.password = hash;
+
+      // console.log(newUser.password);
+      database.users.push(newUser);
+      res.json(database.users[database.users.length - 1]
+      );
+    });
+  });
+});  
 
 // profile route: GET
 app.get("/profile/:id", (req, res) => {
   const id = req.params.id;
-  let found= false;
+  let found = false;
   database.users.map(user => {
     if (user.id === id) {
       found = true;
       return res.json(user);
     }
   });
-  if(!found) {
+  if (!found) {
     res.status(400).json("User not found");
   }
 });
@@ -75,7 +95,7 @@ app.get("/profile/:id", (req, res) => {
 // image entries route : PUT
 app.put("/image", (req, res) => {
   const id = req.body.id;
-  let found= false;
+  let found = false;
   database.users.map(user => {
     if (user.id === id) {
       found = true;
@@ -83,7 +103,7 @@ app.put("/image", (req, res) => {
       return res.json(user);
     }
   });
-  if(!found) {
+  if (!found) {
     res.status(400).json("User not found");
   }
 });

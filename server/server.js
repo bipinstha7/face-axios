@@ -72,6 +72,22 @@ app.get("/profile/:id", (req, res) => {
   }
 });
 
+// image entries route : PUT
+app.put("/image", (req, res) => {
+  const id = req.body.id;
+  let found= false;
+  database.users.map(user => {
+    if (user.id === id) {
+      found = true;
+      user.entries++;
+      return res.json(user);
+    }
+  });
+  if(!found) {
+    res.status(400).json("User not found");
+  }
+});
+
 
 
 const port = process.env.PORT || 5000;

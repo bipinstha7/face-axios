@@ -21,7 +21,7 @@ const database = {
 }
 
 app.get("/", (req, res) => {
-  res.send("This is home route");
+  res.json(database.users);
 });
 
 app.post("/signin", (req, res) => {
@@ -32,7 +32,18 @@ app.post("/signin", (req, res) => {
   }
 })
 
-
+app.post("/register", (req, res) => {
+  const newUser = {
+    id: "4433",
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    entries: 0,
+    joined: new Date()
+  }
+  database.users.push(newUser);
+  res.json(database.users[database.users.length-1]);
+});
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

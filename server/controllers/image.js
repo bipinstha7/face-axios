@@ -3,6 +3,7 @@ const router = express.Router();
 
 const knex = require("../db/db");
 
+
 router.put("/image", (req, res) => {
   const id = req.body.id;
 

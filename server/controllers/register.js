@@ -6,6 +6,10 @@ const knex = require("../db/db");
 
 router.post("/register", (req, res) => {
 
+  if(!req.body.email || !req.body.name || !req.body.password) {
+    return res.status(400).json("incorrect form submission");
+  }
+
   // password encryption- hash
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(req.body.password, salt, (err, hash) => {

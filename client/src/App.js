@@ -72,13 +72,13 @@ class App extends Component {
 
   onButtonSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    
+
     app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
       .then(response => {
-        if(response) {
-          axios.put("http://localhost:5000/image", {id: this.state.user.id})
-          .then(count => this.setState(Object.assign(this.state.user, {entries: count.data.entries})))
-          .catch(err => console.log(err));
+        if (response) {
+          axios.put("http://localhost:5000/image", { id: this.state.user.id })
+            .then(count => this.setState(Object.assign(this.state.user, { entries: count.data.entries })))
+            .catch(err => console.log(err));
         }
         this.displayFaceBox(this.calculateFaceLocation(response));
       })
@@ -100,7 +100,7 @@ class App extends Component {
         <Navigation isSignedin={this.state.isSignedin} onRouteChange={this.onRouteChange} />
         {this.state.route === "home" ?
           <div>
-            <Rank name={this.state.user.name} entries={this.state.user.entries}/>
+            <Rank name={this.state.user.name} entries={this.state.user.entries} />
             <ImageLinkForm
               onInputChange={this.onInputChange}
               onButtonSubmit={this.onButtonSubmit}
@@ -111,8 +111,8 @@ class App extends Component {
             />
           </div>
           : (this.state.route === "signin" ?
-            <Signin 
-              onRouteChange={this.onRouteChange} 
+            <Signin
+              onRouteChange={this.onRouteChange}
               loadUser={this.loadUser}
             />
             :

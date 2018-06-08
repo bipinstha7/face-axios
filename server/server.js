@@ -22,50 +22,41 @@ var knex = require('knex')({
   }
 });
 
-// knex.select('*').from('users')
-//   .then(data => {
-//     console.log(data);
-//   })
-//   .catch(err => console.log(err));
 
-// const database = {
-//   users: [
-//     {
-//       id: "1234",
-//       name: "bipin",
-//       email: "bipin@gmail.com",
-//       password: "care",
-//       entries: 0,
-//       joined: new Date()
-//     },
-//     {
-//       id: "4321",
-//       name: "sudip",
-//       email: "sudip@gmail.com",
-//       password: "shrestha",
-//       entries: 0,
-//       joined: new Date()
-//     }
-//   ]
-// }
+
 
 // index/home route: GET
 app.get("/", (req, res) => {
-  res.json(database.users);
+  knex.select('*').from('users')
+  .then(data => {
+    res.json(data);
+  })
+  .catch(err => res.status(400).json(err));
 });
 
 
 // sign in route: POST
 app.post("/signin", (req, res) => {
-  // const password = req.body.password;
-  // bcrypt.compare(password, hash).then((res) => {
-  //   // res === true
-  // });
-  if (req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
-    res.json(database.users[0]);
-  } else {
-    res.status(400).json("not match");
-  }
+  const password = req.body.password;
+ 
+  knex.select('email', 'hash').from('login')
+    .where('email', '=', req.body.email)
+    .then(user => {
+      bcrypt.compare(password, user[0].hash)
+        .then((isMatch) => {
+          if(isMatch) {
+            return knex.select('*').from('users')
+                    .where('email', '=', req.body.email)
+                    .then(user => {
+                      res.json(user[0]);
+                    })
+                    .catch(err => res.status(404).json("No such user found"));
+          }
+          res.status(400).json("wrong credentials");
+        })
+        .catch(err => res.status(400).json("unble to complete request"));
+    })
+    .catch(err => res.status(400).json("no such user"));
 })
 
 // register route: POST
@@ -77,17 +68,30 @@ app.post("/register", (req, res) => {
       if (err) throw new Error;
       req.body.password = hash;
 
-      knex('users')
-        .returning('*')
-        .insert({
-          name: req.body.name,
-          email: req.body.email,
-          joined: new Date()
+      knex.transaction(trx => {
+        trx.insert({
+          hash: req.body.password,
+          email: req.body.email
         })
-        .then(user => {
-          res.json(user[0]);
+        .into('login')
+        .returning('email')
+        .then(loginemail => {
+          return trx('users')
+                  .returning('*')
+                  .insert({
+                    name: req.body.name,
+                    email: loginemail[0],
+                    joined: new Date()
+                  })
+                  .then(user => {
+                    res.json(user[0]);
+                  })
+                  .catch(err => res.status(400).json(err.detail));
         })
-        .catch(err => res.status(400).json(err.detail));
+        .then(trx.commit)
+        .catch(trx.rollback);
+      })
+      .catch(err => res.status(400).json("unable to register"));
     });
   });
 });
@@ -97,26 +101,26 @@ app.get("/profile/:id", (req, res) => {
   const id = req.params.id;
   knex.select('*').from('users').where({ id: id })
     .then(user => {
-      if(user[0]) {
+      if (user[0]) {
         res.json(user[0]);
       } else {
         res.status(400).json("User not found");
       }
-    }) 
+    })
     .catch(err => res.status(400).json("Error getting user"));
 });
 
 // image entries route : PUT
 app.put("/image", (req, res) => {
   const id = req.body.id;
-  
+
   knex('users')
     .where('id', '=', id)
     .increment('entries', 1)
     .returning('entries')
-    .then(entries=> res.json({"entries": entries[0]}))
+    .then(entries => res.json({ "entries": entries[0] }))
     .catch(err => console.log(err));
-  });
+});
 
 
 

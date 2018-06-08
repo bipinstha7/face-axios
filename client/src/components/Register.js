@@ -34,7 +34,7 @@ class Register extends Component {
 
     axios.post("http://localhost:5000/register", newUser)
       .then(user => {
-        if(user) {
+        if(user.data.id) {
           this.props.loadUser(user.data);
           this.props.onRouteChange("home");
         }

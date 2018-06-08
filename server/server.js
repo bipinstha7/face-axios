@@ -102,25 +102,21 @@ app.get("/profile/:id", (req, res) => {
       } else {
         res.status(400).json("User not found");
       }
-    })
+    }) 
     .catch(err => res.status(400).json("Error getting user"));
 });
 
 // image entries route : PUT
 app.put("/image", (req, res) => {
   const id = req.body.id;
-  let found = false;
-  database.users.map(user => {
-    if (user.id === id) {
-      found = true;
-      user.entries++;
-      return res.json(user);
-    }
+  
+  knex('users')
+    .where('id', '=', id)
+    .increment('entries', 1)
+    .returning('entries')
+    .then(entries=> res.json({"entries": entries[0]}))
+    .catch(err => console.log(err));
   });
-  if (!found) {
-    res.status(400).json("User not found");
-  }
-});
 
 
 

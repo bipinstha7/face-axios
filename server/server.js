@@ -12,6 +12,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // cors middlwware
 app.use(cors());
 
+var knex = require('knex')({
+  client: 'pg',
+  connection: {
+    host: '127.0.0.1', // localhost
+    user: 'postgres',
+    password: 'postgres',
+    database: 'faceaxios'
+  }
+});
+
+knex.select('*').from('users')
+  .then(data => {
+    console.log(data);
+  })
+  .catch(err => console.log(err));
+
 const database = {
   users: [
     {
@@ -54,28 +70,27 @@ app.post("/signin", (req, res) => {
 
 // register route: POST
 app.post("/register", (req, res) => {
-  const newUser = {
-    id: "4433",
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    entries: 0,
-    joined: new Date()
-  }
 
   // password encryption- hash
   bcrypt.genSalt(10, (err, salt) => {
-    bcrypt.hash(newUser.password, salt, (err, hash) => {
+    bcrypt.hash(req.body.password, salt, (err, hash) => {
       if (err) throw new Error;
-      newUser.password = hash;
+      req.body.password = hash;
 
-      // console.log(newUser.password);
-      database.users.push(newUser);
-      res.json(database.users[database.users.length - 1]
-      );
+      knex('users')
+        .returning('*')
+        .insert({
+          name: req.body.name,
+          email: req.body.email,
+          joined: new Date()
+        })
+        .then(user => {
+          res.json(user); //res.json(user[0]);
+        })
+        .catch(err => res.status(400).json(err.detail));
     });
   });
-});  
+});
 
 // profile route: GET
 app.get("/profile/:id", (req, res) => {

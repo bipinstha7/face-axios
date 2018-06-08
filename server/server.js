@@ -22,32 +22,32 @@ var knex = require('knex')({
   }
 });
 
-knex.select('*').from('users')
-  .then(data => {
-    console.log(data);
-  })
-  .catch(err => console.log(err));
+// knex.select('*').from('users')
+//   .then(data => {
+//     console.log(data);
+//   })
+//   .catch(err => console.log(err));
 
-const database = {
-  users: [
-    {
-      id: "1234",
-      name: "bipin",
-      email: "bipin@gmail.com",
-      password: "care",
-      entries: 0,
-      joined: new Date()
-    },
-    {
-      id: "4321",
-      name: "sudip",
-      email: "sudip@gmail.com",
-      password: "shrestha",
-      entries: 0,
-      joined: new Date()
-    }
-  ]
-}
+// const database = {
+//   users: [
+//     {
+//       id: "1234",
+//       name: "bipin",
+//       email: "bipin@gmail.com",
+//       password: "care",
+//       entries: 0,
+//       joined: new Date()
+//     },
+//     {
+//       id: "4321",
+//       name: "sudip",
+//       email: "sudip@gmail.com",
+//       password: "shrestha",
+//       entries: 0,
+//       joined: new Date()
+//     }
+//   ]
+// }
 
 // index/home route: GET
 app.get("/", (req, res) => {
@@ -95,16 +95,15 @@ app.post("/register", (req, res) => {
 // profile route: GET
 app.get("/profile/:id", (req, res) => {
   const id = req.params.id;
-  let found = false;
-  database.users.map(user => {
-    if (user.id === id) {
-      found = true;
-      return res.json(user);
-    }
-  });
-  if (!found) {
-    res.status(400).json("User not found");
-  }
+  knex.select('*').from('users').where({ id: id })
+    .then(user => {
+      if(user[0]) {
+        res.json(user[0]);
+      } else {
+        res.status(400).json("User not found");
+      }
+    })
+    .catch(err => res.status(400).json("Error getting user"));
 });
 
 // image entries route : PUT
@@ -129,3 +128,4 @@ const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`server is running on port: ${port}`);
 });
+// .on("error", console.log);

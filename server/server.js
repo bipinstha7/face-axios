@@ -29,15 +29,18 @@ app.get("/", (req, res) => {
 
 // sign in route: POST
 app.use(signin);
+// app.use("/signin",signin);
 
 // register route: POST
 app.use(register);
+// app.use("/register",register);
 
 // profile route: GET
 app.use(profile);
+// app.use("/profile",profile);
 
 // image entries route : PUT
-app.use(image);
+// app.use("/image",image);
 
 
 
